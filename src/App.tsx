@@ -1,5 +1,4 @@
-import { HashRouter, Routes, Route } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Altas from './pages/Altas';
@@ -9,24 +8,31 @@ import Consultas from './pages/Consultas';
 import Configuracion from './pages/Configuracion';
 import { initializeData } from './utils/storage';
 
+export type Page = 'dashboard' | 'altas' | 'bajas' | 'incidencias' | 'consultas' | 'configuracion';
+
 function App() {
+  const [currentPage, setCurrentPage] = useState<Page>('dashboard');
+
   useEffect(() => {
     initializeData();
   }, []);
 
+  function renderPage() {
+    switch (currentPage) {
+      case 'dashboard': return <Dashboard />;
+      case 'altas': return <Altas />;
+      case 'bajas': return <Bajas />;
+      case 'incidencias': return <Incidencias />;
+      case 'consultas': return <Consultas />;
+      case 'configuracion': return <Configuracion />;
+      default: return <Dashboard />;
+    }
+  }
+
   return (
-    <HashRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="altas" element={<Altas />} />
-          <Route path="bajas" element={<Bajas />} />
-          <Route path="incidencias" element={<Incidencias />} />
-          <Route path="consultas" element={<Consultas />} />
-          <Route path="configuracion" element={<Configuracion />} />
-        </Route>
-      </Routes>
-    </HashRouter>
+    <Layout currentPage={currentPage} onNavigate={setCurrentPage}>
+      {renderPage()}
+    </Layout>
   );
 }
 

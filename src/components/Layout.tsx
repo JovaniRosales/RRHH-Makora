@@ -1,20 +1,26 @@
 import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
 import { 
   Users, UserPlus, UserMinus, Calendar, Search, Settings, 
   LayoutDashboard, Menu, X, Building2
 } from 'lucide-react';
+import { Page } from '../App';
 
-const navItems = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/altas', icon: UserPlus, label: 'Altas' },
-  { to: '/bajas', icon: UserMinus, label: 'Bajas' },
-  { to: '/incidencias', icon: Calendar, label: 'Incidencias' },
-  { to: '/consultas', icon: Search, label: 'Consultas' },
-  { to: '/configuracion', icon: Settings, label: 'Configuración' },
+interface LayoutProps {
+  currentPage: Page;
+  onNavigate: (page: Page) => void;
+  children: React.ReactNode;
+}
+
+const navItems: { page: Page; icon: any; label: string }[] = [
+  { page: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { page: 'altas', icon: UserPlus, label: 'Altas' },
+  { page: 'bajas', icon: UserMinus, label: 'Bajas' },
+  { page: 'incidencias', icon: Calendar, label: 'Incidencias' },
+  { page: 'consultas', icon: Search, label: 'Consultas' },
+  { page: 'configuracion', icon: Settings, label: 'Configuración' },
 ];
 
-export default function Layout() {
+export default function Layout({ currentPage, onNavigate, children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -33,24 +39,23 @@ export default function Layout() {
         </div>
         
         <nav className="mt-6 px-3 space-y-1">
-          {navItems.map(item => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === '/'}
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => 
-                `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+          {navItems.map(item => {
+            const isActive = currentPage === item.page;
+            return (
+              <button
+                key={item.page}
+                onClick={() => { onNavigate(item.page); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                   isActive 
                     ? 'bg-white/15 text-white shadow-lg' 
                     : 'text-indigo-200 hover:bg-white/10 hover:text-white'
-                }`
-              }
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="font-medium text-sm">{item.label}</span>
-            </NavLink>
-          ))}
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="font-medium text-sm">{item.label}</span>
+              </button>
+            );
+          })}
         </nav>
 
         <div className="absolute bottom-4 left-4 right-4">
@@ -59,7 +64,7 @@ export default function Layout() {
               <Users className="w-4 h-4 text-indigo-300" />
               <span className="text-indigo-200 text-xs">Total Colaboradores</span>
             </div>
-            <p className="text-white font-bold text-2xl mt-1" id="sidebar-count">--</p>
+            <p className="text-white font-bold text-2xl mt-1">--</p>
           </div>
         </div>
       </aside>
@@ -86,7 +91,7 @@ export default function Layout() {
         </header>
 
         <main className="flex-1 p-4 lg:p-8 overflow-auto">
-          <Outlet />
+          {children}
         </main>
       </div>
     </div>
